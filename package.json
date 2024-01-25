@@ -6,7 +6,8 @@
     "dev": "bun run --smol index.ts"
   },
   "devDependencies": {
-    "@types/node": "latest"
+    "@types/node": "latest",
+    "mp3tag.js": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

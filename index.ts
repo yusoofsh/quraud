@@ -1,10 +1,27 @@
-import { constants, createWriteStream } from "fs";
-import { access, mkdir } from "fs/promises";
-import { join } from "path";
-import { stdout } from "process";
-import { pipeline } from "stream/promises";
+import MP3Tag from "mp3tag.js";
+import { createWriteStream, existsSync } from "node:fs";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { stdout } from "node:process";
+import { pipeline } from "node:stream/promises";
 
-const download = async (url: string, path: string, file: string) => {
+const rename = async (path: string, file: string) => {
+  stdout.write(`[Renaming] ${file}\r`);
+
+  const original = await readFile(path);
+  const mp3tag = new MP3Tag(original);
+
+  mp3tag.read();
+  mp3tag.tags.album = "Quran Central";
+  mp3tag.save({ strict: true });
+
+  // @ts-expect-error
+  await writeFile(path, mp3tag.buffer);
+};
+
+const download = async (surah: string, path: string, file: string) => {
+  const url = `https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/saad-al-ghamdi/saad-al-ghamdi-surah-${surah}.mp3`;
+
   try {
     const response = await fetch(url);
 
@@ -70,15 +87,13 @@ const main = async () => {
 
   for (let index = 1; index <= 114; index++) {
     const surah = index.toString().padStart(3, "0");
-    const url = `https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/saad-al-ghamdi/saad-al-ghamdi-surah-${surah}.mp3`;
-
     const file = `Saad Al Ghamdi - Quran Surah ${surah}.mp3`;
     const path = join(folder, file);
 
-    try {
-      await access(path, constants.F_OK);
-    } catch (error) {
-      await download(url, path, file);
+    if (existsSync(path)) {
+      await rename(path, file);
+    } else {
+      await download(surah, path, file);
     }
   }
 };
