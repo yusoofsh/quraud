@@ -1,13 +1,17 @@
 import MP3Tag from "mp3tag.js";
 import { createWriteStream, existsSync } from "node:fs";
-import { access, mkdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { access, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname, extname, join } from "node:path";
 import { stdout } from "node:process";
 import { pipeline } from "node:stream/promises";
 
-type Props = { surah: string; path: string; file: string };
+type Props = {
+  surah: string;
+  path: string;
+  file: string;
+};
 
-const rename = async ({ surah, path, file }: Props) => {
+const renameFile = async ({ surah, path, file }: Props) => {
   const mp3tag = new MP3Tag(await readFile(path));
 
   mp3tag.read();
@@ -25,10 +29,12 @@ const rename = async ({ surah, path, file }: Props) => {
   // @ts-expect-error
   await writeFile(path, mp3tag.buffer);
 
+  await rename(path, join(dirname(path), `${title}${extname(path)}`));
+
   stdout.write(`[Renamed] ${file}\r`);
 };
 
-const download = async ({ surah, path, file }: Props) => {
+const downloadFile = async ({ surah, path, file }: Props) => {
   const url = `https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/saad-al-ghamdi/saad-al-ghamdi-surah-${surah}.mp3`;
 
   try {
@@ -100,9 +106,9 @@ const main = async () => {
     const path = join(folder, file);
 
     if (existsSync(path)) {
-      await rename({ surah, path, file });
+      await renameFile({ surah, path, file });
     } else {
-      await download({ surah, path, file });
+      await downloadFile({ surah, path, file });
     }
   }
 };
