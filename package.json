@@ -1,0 +1,14 @@
+{
+  "name": "quraud",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --smol index.ts"
+  },
+  "devDependencies": {
+    "@types/node": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
