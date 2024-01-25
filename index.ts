@@ -9,10 +9,11 @@ type Props = { surah: string; path: string; file: string };
 
 const rename = async ({ surah, path, file }: Props) => {
   const mp3tag = new MP3Tag(await readFile(path));
-  const album = "Quran Central";
-  const title = `${surah} ${mp3tag.tags.title}`;
 
   mp3tag.read();
+
+  const album = "Quran Central";
+  const title = `${surah} ${mp3tag.tags.title}`;
 
   if (mp3tag.tags.album === album && mp3tag.tags.title === title) return;
 
